@@ -116,7 +116,11 @@ def write_plain(path: Path, prefixes: Sequence[str]) -> None:
 
 
 def write_clash(path: Path, prefixes: Sequence[str]) -> None:
-    lines = [f"IP-CIDR,{prefix}" for prefix in prefixes]
+    lines = []
+    for prefix in prefixes:
+        network = ipaddress.ip_network(prefix, strict=False)
+        tag = "IP-CIDR6" if network.version == 6 else "IP-CIDR"
+        lines.append(f"{tag},{network.compressed}/{network.prefixlen}")
     path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
 
 
