@@ -6,8 +6,10 @@
 
 - `<provider>_plain.txt` – one subnet per line (IPv4 + IPv6).
 - `<provider>_plain_ipv4.txt` – the same, but IPv4-only.
+- `<provider>_ipcidr.mrs` – MRS (Mihomo Rule Set) binary format (IPv4 + IPv6).
+- `<provider>_ipcidr_ipv4.mrs` – MRS format, IPv4-only.
 
-Need every provider in a single rule set? Use the `all/` directory, which aggregates every prefix before generating the same two files.
+Need every provider in a single rule set? Use the `all/` directory, which aggregates every prefix before generating the same files.
 
 ### Usage
 
@@ -16,6 +18,18 @@ Guides for different apps are available in the wiki: https://github.com/123jjck/
 ### Refreshing the data
 
 Run `python3 scripts/update_cdn_lists.py` locally to pull the latest ranges and rewrite the text files.
+
+To also generate MRS files (requires [mihomo](https://github.com/MetaCubeX/mihomo/releases) CLI):
+
+~~~bash
+python3 scripts/update_cdn_lists.py --mrs
+~~~
+
+Or use the standalone MRS generator for existing text files:
+
+~~~bash
+python3 scripts/generate_mrs.py
+~~~
 
 ### Where the data comes from
 
@@ -36,9 +50,11 @@ GitHub Actions (`.github/workflows/update-cdn-lists.yml`) executes the script ev
 
 - `<провайдер>_plain.txt` — по одной подсети на строку (IPv4+IPv6).
 - `<провайдер>_plain_ipv4.txt` — только IPv4-вариант.
+- `<провайдер>_ipcidr.mrs` — бинарный формат MRS (Mihomo Rule Set) (IPv4+IPv6).
+- `<провайдер>_ipcidr_ipv4.mrs` — формат MRS, только IPv4.
 
 Нужен единый набор правил сразу для всех CDN?  
-Берите файлы из папки `all/` — туда попадают все подсети перед генерацией тех же двух файлов.
+Берите файлы из папки `all/` — туда попадают все подсети перед генерацией тех же файлов.
 
 Также доступен сервис [cheburcheck.ru](https://github.com/LowderPlay/cheburcheck) — он позволяет проверить домен или IP-адрес на наличие в любых списках проекта, а также в списках РКН.
 
@@ -55,6 +71,18 @@ python3 scripts/update_cdn_lists.py
 ~~~
 
 Скрипт скачает актуальные диапазоны и перезапишет файлы.
+
+Для генерации MRS файлов (требуется [mihomo](https://github.com/MetaCubeX/mihomo/releases) CLI):
+
+~~~bash
+python3 scripts/update_cdn_lists.py --mrs
+~~~
+
+Или используйте отдельный генератор MRS для существующих текстовых файлов:
+
+~~~bash
+python3 scripts/generate_mrs.py
+~~~
 
 ### Источники информации
 

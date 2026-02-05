@@ -17,8 +17,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Generate CDN lists
-        run: python3 scripts/update_cdn_lists.py
+      - name: Install mihomo CLI
+        run: |
+          MIHOMO_VERSION=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | jq -r '.tag_name')
+          curl -Lo mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
+          gunzip mihomo.gz
+          chmod +x mihomo
+          sudo mv mihomo /usr/local/bin/
+
+      - name: Generate CDN lists with MRS
+        run: python3 scripts/update_cdn_lists.py --mrs
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -35,4 +43,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "${{ env.COMMIT_NAME }}"
-          file_pattern: "**/*.txt **/*.csv **/*.json **/*.dat"
+          file_pattern: "**/*.txt **/*.csv **/*.json **/*.dat **/*.mrs"

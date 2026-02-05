@@ -2,10 +2,13 @@
 """Generate CDN IP range lists in plain text formats."""
 from __future__ import annotations
 
+import argparse
 import csv
 import ipaddress
 import json
 import os
+import shutil
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -252,7 +255,45 @@ def write_amnezia_ipv4_json(path: Path, prefixes: Sequence[PrefixEntry]) -> None
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def write_provider_outputs(provider: str, prefixes: Sequence[PrefixEntry]) -> None:
+def check_mihomo_installed() -> bool:
+    """Check if mihomo CLI is available in PATH."""
+    return shutil.which("mihomo") is not None
+
+
+def write_mrs(source_path: Path, output_path: Path, behavior: str = "ipcidr") -> bool:
+    """Convert a text file to MRS format using mihomo CLI.
+    
+    Args:
+        source_path: Path to the source text file with IP ranges
+        output_path: Path where the MRS file will be created
+        behavior: Rule behavior type - 'ipcidr' for IP ranges, 'domain' for domains
+        
+    Returns:
+        True if conversion succeeded, False otherwise
+    """
+    try:
+        subprocess.run(
+            [
+                "mihomo",
+                "convert-ruleset",
+                behavior,
+                "text",
+                str(source_path),
+                str(output_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return True
+    except subprocess.CalledProcessError as exc:
+        print(f"  Error converting to MRS {source_path.name}: {exc.stderr}", file=sys.stderr)
+        return False
+    except FileNotFoundError:
+        return False
+
+
+def write_provider_outputs(provider: str, prefixes: Sequence[PrefixEntry], generate_mrs: bool = False) -> None:
     provider_dir = REPO_ROOT / provider
     provider_dir.mkdir(parents=True, exist_ok=True)
 
@@ -269,6 +310,13 @@ def write_provider_outputs(provider: str, prefixes: Sequence[PrefixEntry]) -> No
     write_plain(plain_path, prefixes)
     write_plain(plain_ipv4_path, ipv4_prefixes)
     write_amnezia_ipv4_json(amnezia_ipv4_path, ipv4_prefixes)
+
+    # Generate MRS files if requested and mihomo is available
+    if generate_mrs:
+        mrs_path = provider_dir / f"{provider}_ipcidr.mrs"
+        mrs_ipv4_path = provider_dir / f"{provider}_ipcidr_ipv4.mrs"
+        write_mrs(plain_path, mrs_path)
+        write_mrs(plain_ipv4_path, mrs_ipv4_path)
 
 
 def write_all_csv(entries: Sequence[tuple[str, PrefixEntry]]) -> None:
@@ -301,6 +349,22 @@ def write_all_no_akamai_plain_ipv4(entries: Sequence[tuple[str, PrefixEntry]]) -
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Generate CDN IP range lists in plain text formats."
+    )
+    parser.add_argument(
+        "--mrs",
+        action="store_true",
+        help="Also generate MRS (Mihomo Rule Set) files (requires mihomo CLI)",
+    )
+    args = parser.parse_args()
+
+    generate_mrs = args.mrs
+    if generate_mrs and not check_mihomo_installed():
+        print("Warning: --mrs flag set but mihomo CLI not found. MRS files will not be generated.", file=sys.stderr)
+        print("Download from: https://github.com/MetaCubeX/mihomo/releases", file=sys.stderr)
+        generate_mrs = False
+
     providers: Sequence[ProviderSpec] = (
         ProviderSpec("akamai", lambda: list(fetch_ripe_prefixes("20940")) + list(fetch_ripe_prefixes("63949"))),
         ProviderSpec("aws", fetch_aws_ranges),
@@ -329,7 +393,7 @@ def main() -> int:
             raw_prefixes = list(spec.fetcher())
             prefixes = normalize_prefixes(spec.name, raw_prefixes)
             aggregated = aggregate_prefixes(spec.name, prefixes)
-            write_provider_outputs(spec.name, aggregated)
+            write_provider_outputs(spec.name, aggregated, generate_mrs=generate_mrs)
             print(f"Generated {len(aggregated):>5} aggregated prefixes for {spec.name}")
             all_prefixes.extend(aggregated)
             all_csv_entries.extend((spec.name, entry) for entry in prefixes)
@@ -340,7 +404,7 @@ def main() -> int:
     if all_prefixes:
         normalized_all = normalize_prefixes("all", all_prefixes)
         aggregated_all = aggregate_prefixes("all", normalized_all)
-        write_provider_outputs("all", aggregated_all)
+        write_provider_outputs("all", aggregated_all, generate_mrs=generate_mrs)
         write_all_csv(all_csv_entries)
         write_all_no_akamai_plain_ipv4(all_csv_entries)
         print(f"Generated {len(aggregated_all):>5} aggregated prefixes for all providers")
