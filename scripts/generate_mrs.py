@@ -43,7 +43,20 @@ PROVIDERS = [
 
 def check_mihomo_installed() -> bool:
     """Check if mihomo CLI is available in PATH."""
-    return shutil.which("mihomo") is not None
+    try:
+        # Try to invoke mihomo with a harmless flag to ensure it is installed and executable
+        subprocess.run(
+            ["mihomo", "-v"],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return True
+    except FileNotFoundError:
+        return False
+    except Exception:
+        # Any unexpected error while invoking mihomo is treated as not installed/usable
+        return False
 
 
 def convert_to_mrs(source_path: Path, output_path: Path, behavior: str = "ipcidr") -> bool:

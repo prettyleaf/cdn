@@ -19,8 +19,14 @@ jobs:
 
       - name: Install mihomo CLI
         run: |
-          MIHOMO_VERSION=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | jq -r '.tag_name')
-          curl -Lo mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
+          FALLBACK_VERSION="v1.19.9"
+          MIHOMO_VERSION=$(curl -sfL --retry 3 https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | jq -r '.tag_name') || true
+          if [ -z "$MIHOMO_VERSION" ] || [ "$MIHOMO_VERSION" = "null" ]; then
+            echo "::warning::Failed to fetch latest mihomo version, using fallback: $FALLBACK_VERSION"
+            MIHOMO_VERSION="$FALLBACK_VERSION"
+          fi
+          echo "Installing mihomo $MIHOMO_VERSION"
+          curl -fSL --retry 3 -o mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
           gunzip mihomo.gz
           chmod +x mihomo
           sudo mv mihomo /usr/local/bin/

@@ -260,7 +260,7 @@ def check_mihomo_installed() -> bool:
     return shutil.which("mihomo") is not None
 
 
-def write_mrs(source_path: Path, output_path: Path, behavior: str = "ipcidr") -> bool:
+def convert_to_mrs(source_path: Path, output_path: Path, behavior: str = "ipcidr") -> bool:
     """Convert a text file to MRS format using mihomo CLI.
     
     Args:
@@ -287,7 +287,7 @@ def write_mrs(source_path: Path, output_path: Path, behavior: str = "ipcidr") ->
         )
         return True
     except subprocess.CalledProcessError as exc:
-        print(f"  Error converting to MRS {source_path.name}: {exc.stderr}", file=sys.stderr)
+        print(f"Error converting {source_path.name}: {exc.stderr}", file=sys.stderr)
         return False
     except FileNotFoundError:
         return False
@@ -315,8 +315,10 @@ def write_provider_outputs(provider: str, prefixes: Sequence[PrefixEntry], gener
     if generate_mrs:
         mrs_path = provider_dir / f"{provider}_ipcidr.mrs"
         mrs_ipv4_path = provider_dir / f"{provider}_ipcidr_ipv4.mrs"
-        write_mrs(plain_path, mrs_path)
-        write_mrs(plain_ipv4_path, mrs_ipv4_path)
+        if not convert_to_mrs(plain_path, mrs_path):
+            print(f"Warning: failed to generate MRS file for {provider}", file=sys.stderr)
+        if not convert_to_mrs(plain_ipv4_path, mrs_ipv4_path):
+            print(f"Warning: failed to generate MRS IPv4 file for {provider}", file=sys.stderr)
 
 
 def write_all_csv(entries: Sequence[tuple[str, PrefixEntry]]) -> None:
