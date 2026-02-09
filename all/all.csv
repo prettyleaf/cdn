@@ -6172,6 +6172,7 @@ cloudflare,66.203.249.0/24,
 cloudflare,66.235.200.0/24,
 cloudflare,68.182.187.0/24,
 cloudflare,69.90.210.0/24,
+cloudflare,77.73.113.0/24,
 cloudflare,77.111.106.0/24,
 cloudflare,78.128.122.0/24,
 cloudflare,82.21.82.0/24,
@@ -6210,8 +6211,7 @@ cloudflare,104.22.26.0/24,
 cloudflare,104.22.31.0/24,
 cloudflare,104.22.32.0/24,
 cloudflare,104.22.42.0/23,
-cloudflare,104.22.44.0/24,
-cloudflare,104.22.47.0/24,
+cloudflare,104.22.44.0/22,
 cloudflare,104.22.48.0/24,
 cloudflare,104.22.51.0/24,
 cloudflare,104.22.52.0/24,
@@ -6683,7 +6683,6 @@ cloudflare,172.71.96.0/21,
 cloudflare,172.71.108.0/22,
 cloudflare,172.71.112.0/20,
 cloudflare,172.71.128.0/21,
-cloudflare,172.71.137.0/24,
 cloudflare,172.71.138.0/23,
 cloudflare,172.71.140.0/22,
 cloudflare,172.71.144.0/20,
@@ -6995,7 +6994,6 @@ cloudflare,2400:cb00:532::/47,
 cloudflare,2400:cb00:534::/47,
 cloudflare,2400:cb00:537::/48,
 cloudflare,2400:cb00:538::/48,
-cloudflare,2400:cb00:540::/48,
 cloudflare,2400:cb00:542::/47,
 cloudflare,2400:cb00:545::/48,
 cloudflare,2400:cb00:546::/47,
@@ -7156,6 +7154,7 @@ cloudflare,2400:cb00:1174::/48,
 cloudflare,2400:cb00:1176::/47,
 cloudflare,2400:cb00:1178::/47,
 cloudflare,2400:cb00:1180::/48,
+cloudflare,2400:cb00:1183::/48,
 cloudflare,2400:cb00:1184::/48,
 cloudflare,2400:cb00:1186::/47,
 cloudflare,2400:cb00:1220::/48,
@@ -10040,6 +10039,7 @@ constant,2602:ff03:4::/48,
 constant,2602:ff03:42::/47,
 constant,2602:ff03:d5::/48,
 constant,2602:ff03:fe::/47,
+constant,2602:ff03:141::/48,
 constant,2602:ff03:14b::/48,
 constant,2602:ff03:1a6::/48,
 constant,2602:ff03:27e::/48,
@@ -10050,6 +10050,7 @@ constant,2602:ff03:34d::/48,
 constant,2602:ff03:380::/48,
 constant,2602:ff03:389::/48,
 constant,2602:ff03:41a::/48,
+constant,2602:ff03:437::/48,
 constant,2602:ff03:487::/48,
 constant,2602:ff03:48b::/48,
 constant,2602:ff03:531::/48,
@@ -10129,15 +10130,16 @@ constant,2a0a:bb06:1000::/48,
 constant,2a0b:64c4::/31,
 constant,2a0d:2680:2111::/48,
 constant,2a0d:2680:bf90::/48,
-constant,2a0e:7d45:7730::/46,
+constant,2a0e:7d45:7731::/48,
+constant,2a0e:7d45:7732::/47,
 constant,2a0e:7d45:7734::/47,
 constant,2a0e:7d45:7736::/48,
 constant,2a0e:7d45:77d1::/48,
-constant,2a0e:7d45:77d7::/48,
 constant,2a0e:7d45:77d8::/46,
 constant,2a0e:7d45:77dc::/47,
 constant,2a0e:7d45:77e3::/48,
-constant,2a0e:7d45:77e8::/46,
+constant,2a0e:7d45:77e9::/48,
+constant,2a0e:7d45:77ea::/47,
 constant,2a0e:7d45:77ec::/47,
 constant,2a0e:7d45:77ee::/48,
 constant,2a0e:9d40::/32,
@@ -10188,7 +10190,7 @@ constant,2a13:9500:cf::/48,
 constant,2a14:67c2:1010::/48,
 constant,2a14:7581:fa0::/47,
 constant,2a14:7581:fab::/48,
-constant,2a14:7581:fac::/48,
+constant,2a14:7581:fac::/47,
 constant,2a14:7581:faf::/48,
 constant,2a14:7583:f004::/46,
 constant,2a14:7583:f014::/46,
@@ -10197,8 +10199,7 @@ constant,2a14:7583:f038::/46,
 constant,2a14:7583:f058::/46,
 constant,2a14:7583:f104::/46,
 constant,2a14:7583:f108::/45,
-constant,2a14:7583:f110::/45,
-constant,2a14:7583:f118::/46,
+constant,2a14:7583:f110::/44,
 constant,2a14:ae00:c::/48,
 contabo,2.58.80.0/22,
 contabo,2.59.156.0/24,
@@ -10497,7 +10498,6 @@ datacamp,31.6.47.0/24,
 datacamp,31.14.66.0/23,
 datacamp,31.14.75.0/24,
 datacamp,31.42.124.0/24,
-datacamp,31.56.0.0/24,
 datacamp,31.56.49.0/24,
 datacamp,31.56.98.0/24,
 datacamp,31.56.103.0/24,
@@ -11210,6 +11210,7 @@ datacamp,103.171.123.0/24,
 datacamp,103.210.13.0/24,
 datacamp,103.210.198.0/23,
 datacamp,103.213.212.0/22,
+datacamp,103.216.173.0/24,
 datacamp,103.234.239.0/24,
 datacamp,103.255.76.0/23,
 datacamp,104.143.232.0/21,
@@ -13230,6 +13231,54 @@ digitalocean,2604:a880:800:14::/64,US-NJ
 digitalocean,2604:a880:800:a1::/64,US-NJ
 digitalocean,2604:a880:800:c1::/64,US-NJ
 digitalocean,2604:a880:803::/48,US-NJ
+discord,66.22.236.0/24,Argentina
+discord,2a0e:5940:110::/44,Argentina
+discord,66.22.232.0/24,Australia
+discord,66.22.247.0/24,Australia
+discord,2a0e:5940:d0::/44,Australia
+discord,66.22.200.0/22,Brazil
+discord,66.22.246.0/24,Brazil
+discord,2a0e:5940:10::/44,Brazil
+discord,66.22.233.0/24,Chile
+discord,2a0e:5940:e0::/44,Chile
+discord,66.22.235.0/24,France
+discord,66.22.243.0/24,Germany
+discord,2a0e:5940:180::/44,Germany
+discord,66.22.218.0/23,Hong Kong
+discord,2a0e:5940:60::/44,Hong Kong
+discord,66.22.239.0/24,India
+discord,2a0e:5940:140::/44,India
+discord,66.22.238.0/24,Italy
+discord,2a0e:5940:130::/44,Italy
+discord,66.22.208.0/22,Japan
+discord,66.22.248.0/24,Japan
+discord,2a0e:5940:30::/44,Japan
+discord,66.22.196.0/22,Netherlands
+discord,195.62.89.0/24,Netherlands
+discord,2a0e:5940::/29,Netherlands
+discord,66.22.244.0/24,Romania
+discord,2a0e:5940:190::/44,Romania
+discord,66.22.216.0/23,Russia
+discord,2a0e:5940:50::/44,Russia
+discord,2a0e:5940:100::/44,Russia
+discord,66.22.220.0/23,Singapore
+discord,2a0e:5940:70::/44,Singapore
+discord,66.22.240.0/24,South Africa
+discord,2a0e:5940:150::/44,South Africa
+discord,66.22.228.0/23,South Korea
+discord,66.22.241.0/24,Spain
+discord,2a0e:5940:160::/44,Spain
+discord,66.22.237.0/24,Sweden
+discord,2a0e:5940:120::/44,Sweden
+discord,66.22.242.0/24,United Arab Emirates
+discord,12.129.184.160/29,United States
+discord,64.71.8.96/29,United States
+discord,66.22.192.0/18,United States
+discord,2a0e:5940:20::/44,United States
+discord,2a0e:5940:40::/44,United States
+discord,2a0e:5940:80::/42,United States
+discord,2a0e:5940:c0::/44,United States
+discord,2a0e:5940:f0::/44,United States
 fastly,23.154.64.0/24,
 fastly,23.185.0.0/24,
 fastly,23.235.32.0/23,
@@ -16107,6 +16156,7 @@ ovh,87.229.64.0/24,
 ovh,88.216.221.0/24,
 ovh,88.218.34.0/24,
 ovh,89.19.44.0/24,
+ovh,89.21.84.0/24,
 ovh,89.125.172.0/24,
 ovh,89.213.105.0/24,
 ovh,89.251.28.0/24,
@@ -16169,6 +16219,7 @@ ovh,128.0.118.0/24,
 ovh,130.49.217.0/24,
 ovh,135.125.0.0/16,
 ovh,135.148.0.0/16,
+ovh,136.0.95.0/24,
 ovh,136.0.248.0/24,
 ovh,137.74.0.0/16,
 ovh,137.83.50.0/24,
@@ -16204,6 +16255,7 @@ ovh,141.227.188.0/23,
 ovh,141.227.190.0/24,
 ovh,142.4.192.0/19,
 ovh,142.44.128.0/17,
+ovh,142.111.85.0/24,
 ovh,142.252.51.0/24,
 ovh,142.252.115.0/24,
 ovh,142.252.127.0/24,
@@ -16213,6 +16265,7 @@ ovh,143.20.195.0/24,
 ovh,144.2.32.0/19,
 ovh,144.172.73.0/24,
 ovh,144.217.0.0/16,
+ovh,144.225.162.0/24,
 ovh,145.79.151.0/24,
 ovh,145.239.0.0/16,
 ovh,146.19.9.0/24,
@@ -16252,6 +16305,7 @@ ovh,151.245.127.0/24,
 ovh,151.245.238.0/24,
 ovh,151.246.177.0/24,
 ovh,151.246.190.0/24,
+ovh,151.247.37.0/24,
 ovh,151.247.192.0/24,
 ovh,151.247.217.0/24,
 ovh,152.228.128.0/17,
@@ -16438,17 +16492,17 @@ scaleway,212.47.224.0/19,
 scaleway,212.83.128.0/18,
 scaleway,212.129.0.0/18,
 scaleway,2001:bc8::/32,
-vercel,64.29.17.0/24,
-vercel,64.239.109.0/24,
-vercel,64.239.123.0/24,
-vercel,66.33.60.0/24,
-vercel,76.76.21.0/24,
-vercel,143.13.0.0/16,
-vercel,155.121.0.0/16,
-vercel,198.169.1.0/24,
-vercel,198.169.2.0/24,
-vercel,216.150.1.0/24,
-vercel,216.150.16.0/24,
-vercel,216.198.79.0/24,
-vercel,216.230.84.0/24,
-vercel,216.230.86.0/24,
+vercel,64.29.17.0/24,United States
+vercel,64.239.109.0/24,United States
+vercel,64.239.123.0/24,United States
+vercel,66.33.60.0/24,United States
+vercel,76.76.21.0/24,United States
+vercel,143.13.0.0/16,United States
+vercel,155.121.0.0/16,United States
+vercel,198.169.1.0/24,United States
+vercel,198.169.2.0/24,United States
+vercel,216.150.1.0/24,United States
+vercel,216.150.16.0/24,United States
+vercel,216.198.79.0/24,United States
+vercel,216.230.84.0/24,United States
+vercel,216.230.86.0/24,United States
