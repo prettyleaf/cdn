@@ -44,6 +44,26 @@ jobs:
       - name: Generate sing-box ruleset files
         run: python3 scripts/generate_sing_box_rulesets.py
 
+      - name: Install mihomo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          release_json=$(curl -fs -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/MetaCubeX/mihomo/releases/latest)
+          asset_url=$(echo "$release_json" | jq -r '.assets[] | select(.name | test("^mihomo-linux-amd64-.*\\.gz$")) | .browser_download_url' | head -n1)
+
+          if [ -z "$asset_url" ] || [ "$asset_url" = "null" ]; then
+            echo "Failed to resolve mihomo linux-amd64 release asset"
+            exit 1
+          fi
+
+          curl -fL -H "Authorization: token $GITHUB_TOKEN" "$asset_url" -o mihomo.gz
+          gunzip -f mihomo.gz
+          chmod +x mihomo
+          sudo mv mihomo /usr/local/bin/mihomo
+
+      - name: Generate mihomo ruleset files
+        run: python3 scripts/generate_mihomo_rulesets.py
+
       - name: Set commit name
         run: echo "COMMIT_NAME=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
 
@@ -51,4 +71,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "${{ env.COMMIT_NAME }}"
-          file_pattern: "**/*.txt **/*.csv **/*.json **/*.dat **/*.srs"
+          file_pattern: "**/*.txt **/*.csv **/*.json **/*.dat **/*.srs **/*.mrs"

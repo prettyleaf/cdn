@@ -21,6 +21,7 @@ AWS_IP_RANGES_URL = "https://ip-ranges.amazonaws.com/ip-ranges.json"
 ORACLE_IP_RANGES_URL = "https://docs.oracle.com/iaas/tools/public_ip_ranges.json"
 RIPE_DATA_URL = "https://stat.ripe.net/data/announced-prefixes/data.json?resource={resource}"
 NETWORKSDB_ORG_NETWORKS_URL = "https://networksdb.io/api/org-networks"
+NETWORKSDB_RESULTS_PER_PAGE = 1000
 DIGITALOCEAN_GEO_CSV_URL = "https://digitalocean.com/geo/google.csv"
 TELEGRAM_STATIC_PREFIXES = ("5.28.192.0/18", "109.239.140.0/24", "2a0a:f280::/32")
 
@@ -119,14 +120,20 @@ def fetch_digitalocean_ranges() -> Sequence[PrefixEntry]:
     return prefixes
 
 
-def fetch_vercel_ranges() -> Sequence[PrefixEntry]:
+def _get_networksdb_api_key(provider: str) -> str:
     api_key = os.environ.get("NETWORKSDB_API_KEY")
     if not api_key:
-        raise RuntimeError("vercel: NETWORKSDB_API_KEY environment variable is not set")
+        raise RuntimeError(f"{provider}: NETWORKSDB_API_KEY environment variable is not set")
 
-    payload = urlencode({"id": "vercel-inc"}).encode("utf-8")
+    return api_key
+
+
+def _fetch_networksdb_payload(provider: str, endpoint: str, params: dict[str, str]) -> dict:
+    api_key = _get_networksdb_api_key(provider)
+    payload = urlencode(params).encode("utf-8")
+
     request = Request(
-        NETWORKSDB_ORG_NETWORKS_URL,
+        endpoint,
         data=payload,
         headers={
             "User-Agent": USER_AGENT,
@@ -141,25 +148,101 @@ def fetch_vercel_ranges() -> Sequence[PrefixEntry]:
             body = response.read().decode(charset)
     except HTTPError as exc:  # pragma: no cover - defensive
         raise RuntimeError(
-            f"vercel: HTTP error {exc.code} while fetching {NETWORKSDB_ORG_NETWORKS_URL}"
+            f"{provider}: HTTP error {exc.code} while fetching {endpoint}"
         ) from exc
     except URLError as exc:  # pragma: no cover - defensive
         raise RuntimeError(
-            f"vercel: network error while fetching {NETWORKSDB_ORG_NETWORKS_URL}: {exc.reason}"
+            f"{provider}: network error while fetching {endpoint}: {exc.reason}"
         ) from exc
 
     try:
         payload_json = json.loads(body)
     except json.JSONDecodeError as exc:  # pragma: no cover - defensive
-        raise RuntimeError("vercel: invalid JSON payload from networksdb API") from exc
+        raise RuntimeError(f"{provider}: invalid JSON payload from networksdb API") from exc
 
+    error_message = payload_json.get("error")
+    if error_message and "results" not in payload_json:
+        raise RuntimeError(f"{provider}: networksdb API error: {error_message}")
+
+    return payload_json
+
+
+def _fetch_networksdb_paginated_results(
+    provider: str, endpoint: str, base_params: dict[str, str]
+) -> List[dict]:
+    results: List[dict] = []
+    page = 1
+
+    while True:
+        params = dict(base_params)
+        params["page"] = str(page)
+        payload_json = _fetch_networksdb_payload(provider, endpoint, params)
+
+        page_results = payload_json.get("results", [])
+        if not isinstance(page_results, list):
+            raise RuntimeError(f"{provider}: invalid networksdb response format")
+
+        response_page = payload_json.get("page")
+        if response_page is not None:
+            try:
+                response_page_int = int(response_page)
+            except (TypeError, ValueError) as exc:
+                raise RuntimeError(
+                    f"{provider}: invalid page value in networksdb response"
+                ) from exc
+            if response_page_int != page:
+                raise RuntimeError(
+                    f"{provider}: unexpected page {response_page_int} while requesting page {page}"
+                )
+
+        results.extend(entry for entry in page_results if isinstance(entry, dict))
+
+        if not page_results:
+            break
+
+        total = payload_json.get("total")
+        if total is not None:
+            try:
+                total_int = int(total)
+            except (TypeError, ValueError) as exc:
+                raise RuntimeError(
+                    f"{provider}: invalid total value in networksdb response"
+                ) from exc
+            if len(results) >= total_int:
+                break
+        elif len(page_results) < NETWORKSDB_RESULTS_PER_PAGE:
+            break
+
+        page += 1
+
+    return results
+
+
+def _fetch_networksdb_org_networks(provider: str, org_id: str) -> Sequence[PrefixEntry]:
     prefixes: List[PrefixEntry] = []
-    for entry in payload_json.get("results", []):
-        prefix = entry.get("cidr")
-        if prefix:
-            prefixes.append(PrefixEntry(prefix))
+    for ipv6 in (False, True):
+        params = {"id": org_id}
+        if ipv6:
+            params["ipv6"] = "true"
+        results = _fetch_networksdb_paginated_results(
+            provider, NETWORKSDB_ORG_NETWORKS_URL, params
+        )
+        for entry in results:
+            prefix = str(entry.get("cidr", "")).strip()
+            if not prefix or prefix.upper() == "N/A":
+                continue
+            region = str(entry.get("country", "")).strip()
+            prefixes.append(PrefixEntry(prefix, region))
 
     return prefixes
+
+
+def fetch_vercel_ranges() -> Sequence[PrefixEntry]:
+    return _fetch_networksdb_org_networks("vercel", "vercel-inc")
+
+
+def fetch_discord_ranges() -> Sequence[PrefixEntry]:
+    return _fetch_networksdb_org_networks("discord", "discord-inc")
 
 
 def fetch_ripe_prefixes(asn: str) -> Sequence[PrefixEntry]:
@@ -386,6 +469,7 @@ def main() -> int:
         ProviderSpec("contabo", lambda: fetch_ripe_prefixes("51167")),
         ProviderSpec("datacamp", lambda: fetch_ripe_prefixes("212238")),
         ProviderSpec("digitalocean", fetch_digitalocean_ranges),
+        ProviderSpec("discord", fetch_discord_ranges),
         ProviderSpec("fastly", lambda: fetch_ripe_prefixes("54113")),
         ProviderSpec("hetzner", lambda: list(fetch_ripe_prefixes("24940")) + list(fetch_ripe_prefixes("213230"))),
         ProviderSpec("oracle", lambda: list(fetch_oracle_ranges()) + list(fetch_ripe_prefixes("31898"))),
