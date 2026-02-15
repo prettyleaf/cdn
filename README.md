@@ -4,15 +4,17 @@
 
 ---
 
-`cdn_ip_ranges` collects IPv4/IPv6 subnet lists for popular CDN providers (Akamai, AWS, CDN77, Cloudflare, Cogent, Constant, Contabo, DataCamp, DigitalOcean, Fastly, Hetzner, Oracle, OVH, Roblox, Scaleway, and Vercel) and stores them inside per-provider folders. Each folder (e.g., `aws/`, `hetzner/`) contains:
+`cdn_ip_ranges` collects IPv4/IPv6 subnet lists for popular CDN providers (Akamai, AWS, CDN77, Cloudflare, Cogent, Constant, Contabo, DataCamp, DigitalOcean, Discord, Fastly, Hetzner, Oracle, OVH, Roblox, Scaleway, and Vercel) and stores them inside per-provider folders. Each folder (e.g., `aws/`, `hetzner/`) contains:
 
-- `<provider>_plain.txt` – one subnet per line (IPv4 + IPv6).
-- `<provider>_plain_ipv4.txt` – the same, but IPv4-only.
-- `<provider>_amnezia_ipv4.json` – JSON for [Amnezia VPN](https://amnezia.org/) (IPv4-only, array of objects with `hostname`/`ip` fields).
-- `<provider>_geoip.dat` – binary [V2Ray GeoIP](https://github.com/v2fly/geoip) format (IPv4 + IPv6).
-- `<provider>_geoip_ipv4.dat` – the same, but IPv4-only.
-- `<provider>_singbox.srs` – binary [sing-box ruleset](https://sing-box.sagernet.org/configuration/rule-set) format (IPv4 + IPv6).
-- `<provider>_singbox_ipv4.srs` – the same, but IPv4-only.
+- `<provider>_plain.txt` - one subnet per line (IPv4 + IPv6).
+- `<provider>_plain_ipv4.txt` - the same, but IPv4-only.
+- `<provider>_amnezia_ipv4.json` - JSON for [Amnezia VPN](https://amnezia.org/) (IPv4-only, array of objects with `hostname`/`ip` fields).
+- `<provider>_geoip.dat` - binary [V2Ray GeoIP](https://github.com/v2fly/geoip) format (IPv4 + IPv6).
+- `<provider>_geoip_ipv4.dat` - the same, but IPv4-only.
+- `<provider>_singbox.srs` - binary [sing-box ruleset](https://sing-box.sagernet.org/configuration/rule-set) format (IPv4 + IPv6).
+- `<provider>_singbox_ipv4.srs` - the same, but IPv4-only.
+- `<provider>_mihomo.mrs` - binary [Mihomo rule provider](https://wiki.metacubex.one/en/config/rule-providers/#format) format (IPv4 + IPv6).
+- `<provider>_mihomo_ipv4.mrs` - the same, but IPv4-only.
 
 Need every provider in a single rule set? Use the `all/` directory, which aggregates every prefix before generating the same files.
 
@@ -26,7 +28,7 @@ Run `python3 scripts/update_cdn_lists.py` locally to pull the latest ranges and 
 
 ### Where the data comes from
 
-The script reads official public endpoints provided by the vendors (RIPE Stat for Akamai/CDN77/Cloudflare/Cogent/Constant/Contabo/DataCamp/Fastly/Hetzner/OVH/Roblox/Scaleway, AWS JSON feed, Oracle public IP range JSON, DigitalOcean geo CSV feed, Vercel API) so you always get upstream information without manual copy/paste.
+The script reads official public endpoints provided by the vendors (RIPE Stat for Akamai/CDN77/Cloudflare/Cogent/Constant/Contabo/DataCamp/Fastly/Hetzner/OVH/Roblox/Scaleway, AWS JSON feed, Oracle public IP range JSON, DigitalOcean geo CSV feed, NetworksDB API for Vercel/Discord) so you always get upstream information without manual copy/paste.
 
 ### Automation
 

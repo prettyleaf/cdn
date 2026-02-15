@@ -119,13 +119,19 @@ def fetch_digitalocean_ranges() -> Sequence[PrefixEntry]:
     return prefixes
 
 
-def fetch_vercel_ranges() -> Sequence[PrefixEntry]:
+def _build_networksdb_request(
+    provider: str, org_id: str, page: int, ipv6: bool = False
+) -> Request:
     api_key = os.environ.get("NETWORKSDB_API_KEY")
     if not api_key:
-        raise RuntimeError("vercel: NETWORKSDB_API_KEY environment variable is not set")
+        raise RuntimeError(f"{provider}: NETWORKSDB_API_KEY environment variable is not set")
 
-    payload = urlencode({"id": "vercel-inc"}).encode("utf-8")
-    request = Request(
+    form_data = {"id": org_id, "page": str(page)}
+    if ipv6:
+        form_data["ipv6"] = "true"
+
+    payload = urlencode(form_data).encode("utf-8")
+    return Request(
         NETWORKSDB_ORG_NETWORKS_URL,
         data=payload,
         headers={
@@ -135,31 +141,99 @@ def fetch_vercel_ranges() -> Sequence[PrefixEntry]:
         },
     )
 
+
+def _decode_networksdb_response(provider: str, body: str) -> dict:
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+        raise RuntimeError(f"{provider}: invalid JSON payload from networksdb API") from exc
+
+
+def _network_entry_to_prefixes(provider: str, entry: dict) -> List[PrefixEntry]:
+    cidr = str(entry.get("cidr", "")).strip()
+    if cidr and cidr.upper() != "N/A":
+        return [PrefixEntry(cidr)]
+
+    first_ip_raw = str(entry.get("first_ip", "")).strip()
+    last_ip_raw = str(entry.get("last_ip", "")).strip()
+    if not first_ip_raw or not last_ip_raw:
+        return []
+
+    try:
+        first_ip = ipaddress.ip_address(first_ip_raw)
+        last_ip = ipaddress.ip_address(last_ip_raw)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"{provider}: invalid first_ip/last_ip pair '{first_ip_raw}'-'{last_ip_raw}'"
+        ) from exc
+
+    if first_ip.version != last_ip.version:
+        raise RuntimeError(
+            f"{provider}: mismatched IP versions in '{first_ip_raw}'-'{last_ip_raw}'"
+        )
+    if int(first_ip) > int(last_ip):
+        raise RuntimeError(
+            f"{provider}: first_ip is greater than last_ip in '{first_ip_raw}'-'{last_ip_raw}'"
+        )
+
+    return [PrefixEntry(str(net)) for net in ipaddress.summarize_address_range(first_ip, last_ip)]
+
+
+def _fetch_networksdb_org_networks_page(
+    provider: str, org_id: str, page: int, ipv6: bool = False
+) -> tuple[Sequence[PrefixEntry], int]:
+    request = _build_networksdb_request(provider=provider, org_id=org_id, page=page, ipv6=ipv6)
     try:
         with _urlopen_with_retries(request) as response:
             charset = response.headers.get_content_charset() or "utf-8"
             body = response.read().decode(charset)
     except HTTPError as exc:  # pragma: no cover - defensive
         raise RuntimeError(
-            f"vercel: HTTP error {exc.code} while fetching {NETWORKSDB_ORG_NETWORKS_URL}"
+            f"{provider}: HTTP error {exc.code} while fetching {NETWORKSDB_ORG_NETWORKS_URL}"
         ) from exc
     except URLError as exc:  # pragma: no cover - defensive
         raise RuntimeError(
-            f"vercel: network error while fetching {NETWORKSDB_ORG_NETWORKS_URL}: {exc.reason}"
+            f"{provider}: network error while fetching {NETWORKSDB_ORG_NETWORKS_URL}: {exc.reason}"
         ) from exc
 
-    try:
-        payload_json = json.loads(body)
-    except json.JSONDecodeError as exc:  # pragma: no cover - defensive
-        raise RuntimeError("vercel: invalid JSON payload from networksdb API") from exc
+    payload = _decode_networksdb_response(provider, body)
+    results = payload.get("results", [])
+    if not isinstance(results, list):
+        raise RuntimeError(f"{provider}: unexpected networksdb response format")
+
+    total_pages_raw = payload.get("total_pages", 1)
+    total_pages = total_pages_raw if isinstance(total_pages_raw, int) and total_pages_raw > 0 else 1
 
     prefixes: List[PrefixEntry] = []
-    for entry in payload_json.get("results", []):
-        prefix = entry.get("cidr")
-        if prefix:
-            prefixes.append(PrefixEntry(prefix))
+    for entry in results:
+        if not isinstance(entry, dict):
+            continue
+        prefixes.extend(_network_entry_to_prefixes(provider, entry))
+    return prefixes, total_pages
+
+
+def fetch_networksdb_org_networks(provider: str, org_id: str) -> Sequence[PrefixEntry]:
+    prefixes: List[PrefixEntry] = []
+
+    for ipv6 in (False, True):
+        page = 1
+        total_pages = 1
+        while page <= total_pages:
+            page_prefixes, total_pages = _fetch_networksdb_org_networks_page(
+                provider, org_id, page=page, ipv6=ipv6
+            )
+            prefixes.extend(page_prefixes)
+            page += 1
 
     return prefixes
+
+
+def fetch_vercel_ranges() -> Sequence[PrefixEntry]:
+    return fetch_networksdb_org_networks(provider="vercel", org_id="vercel-inc")
+
+
+def fetch_discord_ranges() -> Sequence[PrefixEntry]:
+    return fetch_networksdb_org_networks(provider="discord", org_id="discord-inc")
 
 
 def fetch_ripe_prefixes(asn: str) -> Sequence[PrefixEntry]:
@@ -386,6 +460,7 @@ def main() -> int:
         ProviderSpec("contabo", lambda: fetch_ripe_prefixes("51167")),
         ProviderSpec("datacamp", lambda: fetch_ripe_prefixes("212238")),
         ProviderSpec("digitalocean", lambda: list(fetch_digitalocean_ranges()) + list(fetch_ripe_prefixes("14061"))),
+        ProviderSpec("discord", fetch_discord_ranges),
         ProviderSpec("fastly", lambda: fetch_ripe_prefixes("54113")),
         ProviderSpec("hetzner", lambda: list(fetch_ripe_prefixes("24940")) + list(fetch_ripe_prefixes("213230"))),
         ProviderSpec("melbicom", lambda: fetch_ripe_prefixes("8849")),
