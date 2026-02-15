@@ -2,7 +2,7 @@ name: Update CDN IP Lists
 
 on:
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -44,6 +44,14 @@ jobs:
       - name: Generate sing-box ruleset files
         run: python3 scripts/generate_sing_box_rulesets.py
 
+      - name: Install mihomo
+        run: |
+          go install github.com/metacubex/mihomo@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Generate mihomo ruleset files
+        run: python3 scripts/generate_mihomo_rulesets.py
+
       - name: Set commit name
         run: echo "COMMIT_NAME=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
 
@@ -51,4 +59,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "${{ env.COMMIT_NAME }}"
-          file_pattern: "**/*.txt **/*.csv **/*.json **/*.dat **/*.srs"
+          file_pattern: "**/*.txt **/*.csv **/*.json **/*.dat **/*.srs **/*.mrs"
