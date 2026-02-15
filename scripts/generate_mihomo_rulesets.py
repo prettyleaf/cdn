@@ -66,7 +66,7 @@ def main() -> int:
         if not source_ipv4.exists():
             raise FileNotFoundError(f"Missing source file: {source_ipv4}")
 
-        convert_ruleset(args.mihomo, source_all, provider_dir / f"{provider}_.mrs")
+        convert_ruleset(args.mihomo, source_all, provider_dir / f"{provider}.mrs")
         convert_ruleset(
             args.mihomo, source_ipv4, provider_dir / f"{provider}_ipv4.mrs"
         )
