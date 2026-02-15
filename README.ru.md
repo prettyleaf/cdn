@@ -5,7 +5,7 @@
 ---
 
 `cdn_ip_ranges` собирает списки IPv4/IPv6 подсетей для популярных CDN
-(Akamai, AWS, CDN77, Cloudflare, Cogent, Constant, Contabo, DataCamp, DigitalOcean, Discord, Fastly, Hetzner, Oracle, OVH, Roblox, Scaleway и Vercel)
+(Akamai, AWS, CDN77, Cloudflare, Cogent, Constant, Contabo, DataCamp, DigitalOcean, Fastly, Hetzner, Oracle, OVH, Roblox, Scaleway и Vercel)
 и складывает их по папкам провайдеров (например, `aws/`, `hetzner/`).
 Внутри каждой папки:
 

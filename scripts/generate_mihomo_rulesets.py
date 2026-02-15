@@ -17,7 +17,6 @@ PROVIDERS = [
     "contabo",
     "datacamp",
     "digitalocean",
-    "discord",
     "fastly",
     "gcore",
     "hetzner",

@@ -232,10 +232,6 @@ def fetch_vercel_ranges() -> Sequence[PrefixEntry]:
     return fetch_networksdb_org_networks(provider="vercel", org_id="vercel-inc")
 
 
-def fetch_discord_ranges() -> Sequence[PrefixEntry]:
-    return fetch_networksdb_org_networks(provider="discord", org_id="discord-inc")
-
-
 def fetch_ripe_prefixes(asn: str) -> Sequence[PrefixEntry]:
     normalized = asn.upper()
     if not normalized.startswith("AS"):
@@ -460,7 +456,6 @@ def main() -> int:
         ProviderSpec("contabo", lambda: fetch_ripe_prefixes("51167")),
         ProviderSpec("datacamp", lambda: fetch_ripe_prefixes("212238")),
         ProviderSpec("digitalocean", lambda: list(fetch_digitalocean_ranges()) + list(fetch_ripe_prefixes("14061"))),
-        ProviderSpec("discord", fetch_discord_ranges),
         ProviderSpec("fastly", lambda: fetch_ripe_prefixes("54113")),
         ProviderSpec("hetzner", lambda: list(fetch_ripe_prefixes("24940")) + list(fetch_ripe_prefixes("213230"))),
         ProviderSpec("melbicom", lambda: fetch_ripe_prefixes("8849")),
