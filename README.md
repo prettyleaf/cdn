@@ -22,6 +22,7 @@ Need every provider in a single rule set? Use the `all/` directory, which aggreg
 |---|---|:---:|
 | Akamai | AS20940, AS63949 | ✅ |
 | AWS | — | ✅ |
+| Bytedance | AS396986 | ✅ |
 | CDN77 | AS60068 | ✅ |
 | Cloudflare | AS13335 | ✅ |
 | Cogent | AS174 | ✅ |
